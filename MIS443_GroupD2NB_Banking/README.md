@@ -2,7 +2,7 @@
 
 > A relational database project demonstrating database design, data import, and SQL query development using PostgreSQL.
 
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-blue)
 ![SQL](https://img.shields.io/badge/SQL-PostgreSQL-blue)
 ![GitHub](https://img.shields.io/badge/GitHub-Portfolio-black)
 ![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
@@ -47,7 +47,7 @@ The main objectives of this project are to:
 
 ## 🛠 Technologies Used
 
-- PostgreSQL 18
+- PostgreSQL 17
 - pgAdmin 4
 - SQL
 - Relational Database Design
@@ -192,7 +192,7 @@ Business Administration Student
 
 Eastern International University (EIU)
 
-GitHub: *(Add your GitHub profile here)*
+GitHub: https://github.com/dohoangbao2004-maker
 
 ---
 
