@@ -85,9 +85,9 @@ create table transactions (
 	transaction_id int primary key,
 	account_id int,
 		foreign key (account_id) 
-			references account(account_id)
+			references accounts(account_id)
 	transaction_type varchar(20),
-	account real,
+	amount real,
 	transaction_date date
 	);
 
@@ -96,7 +96,7 @@ create table loans(
 	customer_id int,
 		foreign key (customer_id) 
 			references customers(customer_id),
-	loan_account real,
+	loan_amount real,
 	interest_rate real,
 	status varchar(20),
 	start_date date
