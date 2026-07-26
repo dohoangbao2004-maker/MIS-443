@@ -57,7 +57,7 @@ create table branches(
 	branch_id int primary key,
 	branch_name varchar(100),
 	city varchar(50),
-	sate varchar(2)
+	state varchar(2)
 	);
 
 create table customers(
@@ -88,7 +88,7 @@ create table transactions (
 			references account(account_id)
 	transaction_type varchar(20),
 	account real,
-	trasaction_date date
+	transaction_date date
 	);
 
 create table loans(
@@ -97,7 +97,7 @@ create table loans(
 		foreign key (customer_id) 
 			references customers(customer_id),
 	loan_account real,
-	interst_rate real,
+	interest_rate real,
 	status varchar(20),
 	start_date date
 	);
