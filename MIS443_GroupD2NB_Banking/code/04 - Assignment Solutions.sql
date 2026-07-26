@@ -1,4 +1,5 @@
-/*===============================================================================
+/*
+===============================================================================
 MIS443 - Assignment 2: PostgreSQL Database Development and SQL Practice
 
 Group        : D2NB
@@ -71,15 +72,15 @@ select customer_id, account_type, balance
 	
 /* Q5: The operations team is reconciling all inbound cash flows and needs a
    full list of deposit transactions.
-   Return transaction_id, account_id, account, and transaction_date,
+   Return transaction_id, account_id, amount, and transaction_date,
    for transaction_type = 'Deposit', ordered by transaction_date. */
-select transaction_id, account_id, account, transaction_date
+select transaction_id, account_id, amount, transaction_date
 from transactions
 where transaction_type = 'Deposit'
 order by transaction_date;
 	
 -- Q6: Return all loans with an Active status.
-select loan_id, customer_id, loan_account, interest_rate
+select loan_id, customer_id, loan_amount, interest_rate
 from loans
 where
 status = 'Active'
@@ -93,11 +94,11 @@ select count(*) as total_accounts
 	from accounts;
 	
 /*Q8: Treasury needs the total deposit inflow across all accounts for the period reconciliation.
-Sum the total account across all Deposit transactions.
+Sum the total amount across all Deposit transactions.
 	Output: Return the sum as total_deposits.
 	Rules: Only include transactions where transaction_type = 'Deposit'., 
 		Return exactly one row.*/
-select sum(account) as total_deposits
+select sum(amount) as total_deposits
 	FROM transactions
 	WHERE transaction_type = 'Deposit';
 	
@@ -111,10 +112,10 @@ order by account_type;
 
 /*Q10: The audit team needs to review mid-month activity. 
 Find all transactions where transaction_date is between January 10 and January 20, 2025 (inclusive). 
-	Show transaction_id, account_id, account, and transaction_date. 
+	Show transaction_id, account_id, amount, and transaction_date. 
 	Order by transaction_date.
 */
-select transaction_id, account_id, account, transaction_date
+select transaction_id, account_id, amount, transaction_date
 from transactions
 where transaction_date between '2025-01-10' and '2025-01-20'
 order by transaction_date;
@@ -182,14 +183,13 @@ join branches b
 order by c.last_name;
 
 /*Q16: Compliance needs a full transaction log enriched with account holder identities for review.
-Medium
-Return each transaction with the transaction date, account, type, and the customer's last name.
+Return each transaction with the transaction date, amount, type, and the customer's last name.
 	Output: Return transaction_date, account, transaction_type, and last_name.
 	Rules: Use JOINs across transactions, accounts, and customers., 
 		Order by transaction_date.
 */
 select t.transaction_date,
-	   t.account,
+	   t.amount,
 	   t.transaction_type,
 	   c.last_name
 from transactions t
@@ -226,19 +226,18 @@ group by customer_id
 order by customer_id;
 
 /*Q19: The loan servicing team needs a customer-level view of all loan obligations and their current status.
-Medium
 Return each loan with the borrower's first and last name, loan account, and status.
-	Output: Return first_name, last_name, loan_account, and status.
+	Output: Return first_name, last_name, loan_amount, and status.
 	Rules: Use a JOIN between loans and customers., 
 		Order by loan_account descending.*/
 select c.first_name,
 	   c.last_name,
-	   l.loan_account,
+	   l.loan_amount,
 	   l.status
 from loans l
 join customers c
 	on l.customer_id = c.customer_id
-order by l.loan_account desc;
+order by l.loan_amount desc;
 
 /*Q20: The regional director needs to see which branches hold the most total deposits across all customer accounts.
 Medium
@@ -275,14 +274,14 @@ order by b.branch_name, c.last_name;
 select account_id,
 	   sum(
 			case
-				when transaction_type = 'Deposit' then account
+				when transaction_type = 'Deposit' then amount
 				else 0
 			end
 	   ) as total_deposits,
 
 	   sum(
 			case
-				when transaction_type = 'Withdrawal' then account
+				when transaction_type = 'Withdrawal' then amount
 				else 0
 			end
 	   ) as total_withdrawals
@@ -291,12 +290,12 @@ group by account_id
 order by account_id;
 
 /*Q23: Group transactions by year-month (using strftime). 
-Show month, transaction count, and total account. 
+Show month, transaction count, and total amount. 
 	Order by month ascending.
 */
 select to_char(transaction_date, 'YYYY-MM') as month,
 	   count(*) as transaction_count,
-	   sum(account) as total_account
+	   sum(amount) as total_amount
 from transactions
 group by month
 order by month;
@@ -319,14 +318,14 @@ order by c.last_name;
 
 /*Q25: Create a cash flow list combining all deposits (labelled 'Income') 
 and all withdrawals (labelled 'Expense') into one unified report. 
-Show account_id, account, flow_type, and transaction_date. 
+Show account_id, amount, flow_type, and transaction_date. 
 	Order by transaction_date.*/
-select account_id, account,
+select account_id, amount,
 	   'Income' as flow_type, transaction_date
 from transactions
 where transaction_type = 'Deposit'
 union all
-select account_id, account,
+select account_id, amount,
 	   'Expense' as flow_type, transaction_date
 from transactions
 where transaction_type = 'Withdrawal'
@@ -337,7 +336,7 @@ Show first name, last name, and total_loans. Only include Active loans.
 */
 select c.first_name,
 	   c.last_name,
-	   sum(l.loan_account) as total_loans
+	   sum(l.loan_amount) as total_loans
 from customers c
 join loans l
 	on c.customer_id = l.customer_id
@@ -379,31 +378,24 @@ select account_id,
 from accounts
 order by account_type, balance_rank;
 
-/*Q29: The branch management team wants to identify the top depositor at each location. 
-Find the customer with the highest total account balance in each branch. 
-	Show first name, last name, branch name, and total_balance.
-*/
+/*Q29: The branch management team wants to identify the top depositor at each location. Find the customer with the highest total account balance in each branch. Show first name, last name, branch name, and total_balance.*/
 with customer_balances as (
 	select c.customer_id, c.first_name, c.last_name, c.branch_id,
 		   sum(a.balance) as total_balance
 	from customers c
-	join accounts a
-		on c.customer_id = a.customer_id
+	join accounts a on c.customer_id = a.customer_id
 	group by c.customer_id, c.first_name, c.last_name, c.branch_id
 	),
 ranked as (
 	select *,
 		   rank() over (
 			   partition by branch_id
-			   order by total_balance desc
-		   ) as rnk
+			   order by total_balance desc) as rnk
 	from customer_balances
-)
-
+	)
 select r.first_name, r.last_name, b.branch_name, r.total_balance
 from ranked r
-join branches b
-	on r.branch_id = b.branch_id
+join branches b on r.branch_id = b.branch_id
 where r.rnk = 1
 order by b.branch_name;
 
